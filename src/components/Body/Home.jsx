@@ -12,7 +12,7 @@ export default function Home() {
     seconds: 0
   });
   const [typedText, setTypedText] = useState('');
-  const fullText = "Join us for the ultimate WebML Camp 2025 experience! Dive into Full-Stack Web Development and AI-ML fundamentals to build smart, practical applications.";
+  const fullText = "Join us for the ultimate Behind The Browser Camp 2025 experience! Dive into Full-Stack Web Development and AI-ML fundamentals to build smart, practical applications.";
 
 
   // Countdown Timer
@@ -61,7 +61,7 @@ export default function Home() {
             <div className="flex items-center justify-center gap-2 mb-6">
               <span className="text-cyan-400 text-2xl md:text-3xl font-mono">&lt;&gt;</span>
               <h1 className="text-3xl md:text-5xl font-bold text-cyan-400 drop-shadow-[0_0_20px_rgba(6,182,212,0.8)]">
-                Welcome to WebML
+                Welcome to "Behind The Browser" Camp 2025
               </h1>
               <svg className="w-8 h-8 md:w-10 md:h-10 text-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -133,7 +133,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About WebML Camp 2025 Section */}
       <section className="container mx-auto px-4 py-8 md:py-12">
         <div className="backdrop-blur-md bg-[rgb(21,24,33)]/40 border border-cyan-400/20 rounded-lg p-8 md:p-12 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
           <div className="text-center mb-8">
@@ -142,7 +141,7 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               <h2 className="text-3xl md:text-4xl font-bold text-purple-500 drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]">
-                About WebML Camp 2025
+                About BTB Camp 2025
               </h2>
             </div>
           </div>
@@ -151,7 +150,7 @@ export default function Home() {
             <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-4">
               <span className="text-cyan-400 font-mono">&lt;p&gt;</span>
               <span className="mx-2">
-                WebML Camp 2025 is a one-day technical workshop designed to introduce students to Full-Stack Web Development (MERN Stack) and Artificial Intelligence (Machine Learning fundamentals). Organized by the CSE Department, the event aims to provide students with hands-on experience in building smart web applications.
+                BTB Camp 2025 is a one-day technical workshop designed to introduce students to Full-Stack Web Development (MERN Stack) and Artificial Intelligence (Machine Learning fundamentals). Organized by the CSE Department, the event aims to provide students with hands-on experience in building smart web applications.
               </span>
               <span className="text-cyan-400 font-mono">&lt;/p&gt;</span>
             </p>
@@ -534,7 +533,7 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
               </svg>
               <span className="text-pink-500/60">&lt;</span>
-              Register for WebML Camp 2025
+              Register for BTB Camp 2025
               <span className="text-pink-500/60">/&gt;</span>
             </span>
           </a>

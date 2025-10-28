@@ -112,7 +112,7 @@ export default function Register() {
             const data = await res.json();
 
             if (res.ok) {
-                alert('Registration Successful! You have been registered for WebML Camp 2025');
+                alert('Registration Successful! You have been registered for BTB Camp 2025');
                 setFormData({
                     name: '',
                     roll: '',
@@ -181,7 +181,7 @@ export default function Register() {
                             </svg>
                             <h1 className="text-2xl md:text-4xl font-bold text-cyan-400 drop-shadow-[0_0_20px_rgba(6,182,212,0.8)] font-mono">
                                 <span className="text-cyan-500/60">&lt;</span>
-                                Register for WebML Camp 2025
+                                Register for BTB Camp 2025
                                 <span className="text-cyan-500/60">/&gt;</span>
                             </h1>
                         </div>

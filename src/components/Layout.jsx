@@ -8,7 +8,7 @@ import Register from "./Body/Register";
 import Error404 from "./Body/Error404";
 
 function WhatsAppFloat() {
-  const whatsappLink = "https://chat.whatsapp.com/KDOFKfGs1dyIDG6eu5VMNM";
+  const whatsappLink = "https://chat.whatsapp.com/C7B9wouQdGyLIbAoPolYnP";
   return (
     <a
       href={whatsappLink}
