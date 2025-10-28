@@ -12,7 +12,7 @@ export default function Home() {
     seconds: 0
   });
   const [typedText, setTypedText] = useState('');
-  const fullText = "Join us for the ultimate Behind The Browser Camp 2025 experience! Dive into Full-Stack Web Development and AI-ML fundamentals to build smart, practical applications.";
+  const fullText = `Join us for the ultimate "Behind The Browser" Camp 2025 experience! Dive into Full-Stack Web Development and AI-ML fundamentals to build smart, practical applications.`;
 
 
   // Countdown Timer
