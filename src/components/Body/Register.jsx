@@ -102,8 +102,8 @@ export default function Register() {
 
         setIsSubmitting(true);
         try {
-            //   const res = await fetch('http://localhost:5000/api/user/register', {
-            const res = await fetch('https://webml-be.vercel.app/api/user/register', {
+            // const res = await fetch('https://webml-be.vercel.app/api/user/register', {
+            const res = await fetch('http://localhost:5000/api/user/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -112,7 +112,7 @@ export default function Register() {
             const data = await res.json();
 
             if (res.ok) {
-                alert('Registration Successful! You have been registered for BTB Camp 2025');
+                alert(`Registration Successful! Check Your Mail for your Entry Ticket`);
                 setFormData({
                     name: '',
                     roll: '',
@@ -271,10 +271,19 @@ export default function Register() {
                                     className="w-full bg-[rgb(15,18,25)]/80 border border-cyan-400/30 rounded px-4 py-2 md:py-3 text-white font-mono text-sm md:text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all"
                                 >
                                     <option value="CSE">CSE</option>
-                                    <option value="IT">IT</option>
+                                    <option value="CSE-AI">CSE-AI</option>
+                                    <option value="CSE-AIML">CSE-AIML</option>
+                                    <option value="CSE-IoT">CSE-IoT</option>
+                                    <option value="CSE-CS">CSE-CS</option>
+                                    <option value="CSE-DS">CSE-DS</option>
+                                    <option value="CST">CST</option>
+                                    <option value="CSIT">CSIT</option>
                                     <option value="ECE">ECE</option>
+                                    <option value="EE">EE</option>
                                     <option value="EEE">EEE</option>
-                                    <option value="MECH">MECH</option>
+                                    <option value="ME">ME</option>
+                                    <option value="CE">CE</option>
+                                    <option value="Other">Other</option>
                                 </select>
                             </div>
 
