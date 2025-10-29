@@ -7,6 +7,7 @@ import Home from "./Body/Home";
 import Register from "./Body/Register";
 import Error404 from "./Body/Error404";
 import Admin from "./Body/Admin";
+import Feedback from "./Body/Feedback";
 
 function WhatsAppFloat() {
   const whatsappLink = "https://chat.whatsapp.com/LOwo3xdkUwPEFaQXmxH72B";
@@ -65,6 +66,7 @@ function Frame() {
           <Route index element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/feedback" element={<Feedback />} />
           <Route path="*" element={<Error404 />} />
         </Route>
         <Route path="/admin" element={<AdminLayout />}>

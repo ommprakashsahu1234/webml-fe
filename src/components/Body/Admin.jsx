@@ -1,18 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
 import Cookies from 'js-cookie';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default function Admin() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [activeTab, setActiveTab] = useState('registrations');
     const [registrations, setRegistrations] = useState([]);
+    const [feedbacks, setFeedbacks] = useState([]);
+    const [feedbackStats, setFeedbackStats] = useState(null);
     const [statistics, setStatistics] = useState({ total: 0, checkedIn: 0, notCheckedIn: 0 });
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState('all');
     const [scannedUser, setScannedUser] = useState(null);
     const [isScanning, setIsScanning] = useState(false);
     const [loading, setLoading] = useState(false);
-    const scannerRef = useRef(null);
+    const [scanError, setScanError] = useState('');
+    const html5QrCodeRef = useRef(null);
 
     const ADMIN_CREDENTIALS = {
         'ommprakashsahu': ['2302094', '8144219523'],
@@ -32,10 +38,19 @@ export default function Admin() {
         if (isAuthenticated) {
             if (activeTab === 'registrations') {
                 fetchRegistrations();
+            } else if (activeTab === 'feedbacks') {
+                fetchFeedbacks();
+                fetchFeedbackStats();
             }
             fetchStatistics();
         }
     }, [isAuthenticated, activeTab, searchTerm, filter]);
+
+    useEffect(() => {
+        return () => {
+            stopScanner();
+        };
+    }, []);
 
     const handleLogin = () => {
         const username = prompt('Enter Admin Username:');
@@ -49,7 +64,7 @@ export default function Admin() {
         if (ADMIN_CREDENTIALS[normalizedUsername] && 
             ADMIN_CREDENTIALS[normalizedUsername].includes(password)) {
             
-            Cookies.set('btb_admin_auth', normalizedUsername, { expires: 1/96 }); // 15 minutes
+            Cookies.set('btb_admin_auth', normalizedUsername, { expires: 1/96 });
             setIsAuthenticated(true);
             fetchData();
             alert('✅ Login Successful!');
@@ -59,9 +74,11 @@ export default function Admin() {
     };
 
     const handleLogout = () => {
+        stopScanner();
         Cookies.remove('btb_admin_auth');
         setIsAuthenticated(false);
         setRegistrations([]);
+        setFeedbacks([]);
         setStatistics({ total: 0, checkedIn: 0, notCheckedIn: 0 });
     };
 
@@ -73,7 +90,7 @@ export default function Admin() {
     const fetchRegistrations = async () => {
         setLoading(true);
         try {
-            let url = 'https://webml-be.vercel.app/api/admin/registrations';
+            let url = 'http://localhost:5000/api/admin/registrations?';
             if (searchTerm) url += `search=${searchTerm}&`;
             if (filter !== 'all') url += `filter=${filter}`;
 
@@ -90,9 +107,41 @@ export default function Admin() {
         }
     };
 
+    const fetchFeedbacks = async () => {
+        setLoading(true);
+        try {
+            let url = 'http://localhost:5000/api/feedback/all?';
+            if (searchTerm) url += `search=${searchTerm}`;
+
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            if (data.success) {
+                setFeedbacks(data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching feedbacks:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchFeedbackStats = async () => {
+        try {
+            const res = await fetch('http://localhost:5000/api/feedback/stats');
+            const data = await res.json();
+            
+            if (data.success) {
+                setFeedbackStats(data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching feedback stats:', error);
+        }
+    };
+
     const fetchStatistics = async () => {
         try {
-            const res = await fetch('https://webml-be.vercel.app/api/admin/statistics');
+            const res = await fetch('http://localhost:5000/api/admin/statistics');
             const data = await res.json();
             
             if (data.success) {
@@ -105,7 +154,7 @@ export default function Admin() {
 
     const handleScanQR = async (qrCode) => {
         try {
-            const res = await fetch(`https://webml-be.vercel.app/api/admin/registrations/qr/${qrCode}`);
+            const res = await fetch(`http://localhost:5000/api/admin/registrations/qr/${qrCode}`);
             const data = await res.json();
 
             if (data.success) {
@@ -116,7 +165,7 @@ export default function Admin() {
             }
         } catch (error) {
             console.error('Error fetching user by QR:', error);
-            alert('❌ Error scanning QR code!');
+            alert('❌ Error: ' + error.message);
         }
     };
 
@@ -124,7 +173,7 @@ export default function Admin() {
         if (!scannedUser) return;
 
         try {
-            const res = await fetch(`https://webml-be.vercel.app/api/admin/registrations/checkin/${scannedUser._id}`, {
+            const res = await fetch(`http://localhost:5000/api/admin/registrations/checkin/${scannedUser._id}`, {
                 method: 'PUT'
             });
             const data = await res.json();
@@ -142,35 +191,184 @@ export default function Admin() {
         }
     };
 
-    const startScanner = () => {
+    const startScanner = async () => {
+        setScanError('');
         setIsScanning(true);
         setScannedUser(null);
 
-        setTimeout(() => {
-            const scanner = new Html5QrcodeScanner('qr-reader', {
-                qrbox: { width: 250, height: 250 },
+        try {
+            await navigator.mediaDevices.getUserMedia({ video: true });
+
+            const html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCodeRef.current = html5QrCode;
+
+            const qrCodeSuccessCallback = (decodedText) => {
+                console.log(`QR Code detected: ${decodedText}`);
+                handleScanQR(decodedText);
+            };
+
+            const config = { 
                 fps: 10,
-            });
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            };
 
-            scanner.render(
-                (decodedText) => {
-                    handleScanQR(decodedText);
-                },
-                (error) => {
-                    console.log(error);
-                }
-            );
-
-            scannerRef.current = scanner;
-        }, 100);
+            try {
+                await html5QrCode.start(
+                    { facingMode: "environment" },
+                    config,
+                    qrCodeSuccessCallback
+                );
+            } catch (err) {
+                console.log('Rear camera not available, trying front camera...');
+                await html5QrCode.start(
+                    { facingMode: "user" },
+                    config,
+                    qrCodeSuccessCallback
+                );
+            }
+        } catch (err) {
+            console.error('Error starting scanner:', err);
+            setIsScanning(false);
+            
+            if (err.name === 'NotAllowedError') {
+                setScanError('❌ Camera permission denied. Please allow camera access.');
+            } else if (err.name === 'NotFoundError') {
+                setScanError('❌ No camera found on this device.');
+            } else if (err.name === 'NotReadableError') {
+                setScanError('❌ Camera is being used by another application.');
+            } else {
+                setScanError('❌ Error accessing camera: ' + err.message);
+            }
+        }
     };
 
     const stopScanner = () => {
-        if (scannerRef.current) {
-            scannerRef.current.clear();
-            scannerRef.current = null;
+        if (html5QrCodeRef.current) {
+            html5QrCodeRef.current.stop().then(() => {
+                html5QrCodeRef.current.clear();
+                html5QrCodeRef.current = null;
+            }).catch(err => {
+                console.error('Error stopping scanner:', err);
+            });
         }
         setIsScanning(false);
+    };
+
+    // Download Registrations as Excel
+    const downloadRegistrationsExcel = () => {
+        const worksheet = XLSX.utils.json_to_sheet(
+            registrations.map(reg => ({
+                'Name': reg.name,
+                'Roll Number': reg.roll,
+                'Email': reg.email,
+                'Mobile': reg.mobile,
+                'Branch': reg.branch,
+                'Year': reg.year,
+                'Gender': reg.gender,
+                'Domain': reg.domain,
+                'Interests': reg.interests.join(', '),
+                'Experience Level': reg.experienceLevel,
+                'Website': reg.website || 'N/A',
+                'GitHub': reg.github || 'N/A',
+                'LinkedIn': reg.linkedin || 'N/A',
+                'Checked In': reg.checkedIn ? 'Yes' : 'No',
+                'Check-in Time': reg.checkInTime ? new Date(reg.checkInTime).toLocaleString() : 'N/A',
+                'Registration Date': new Date(reg.createdAt).toLocaleString()
+            }))
+        );
+        
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
+        XLSX.writeFile(workbook, `BTB_Registrations_${new Date().toISOString().split('T')[0]}.xlsx`);
+    };
+
+    // Download Feedbacks as Excel
+    const downloadFeedbacksExcel = () => {
+        const worksheet = XLSX.utils.json_to_sheet(
+            feedbacks.map(fb => ({
+                'Name': fb.name,
+                'Branch': fb.branch,
+                'Year': fb.year,
+                'Overall Rating': fb.rating,
+                'Content Quality': fb.contentQuality,
+                'Instructor Knowledge': fb.instructorKnowledge,
+                'Venue Rating': fb.venueRating,
+                'Feedback': fb.feedback,
+                'Improvements': fb.improvements || 'N/A',
+                'Next Event Suggestion': fb.nextEventSuggestion,
+                'Would Recommend': fb.wouldRecommend ? 'Yes' : 'No',
+                'Submitted On': new Date(fb.createdAt).toLocaleString()
+            }))
+        );
+        
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Feedbacks');
+        XLSX.writeFile(workbook, `BTB_Feedbacks_${new Date().toISOString().split('T')[0]}.xlsx`);
+    };
+
+    // Download Feedbacks as PDF
+    const downloadFeedbacksPDF = () => {
+        const doc = new jsPDF('landscape');
+        
+        // Title
+        doc.setFontSize(18);
+        doc.setTextColor(6, 182, 212);
+        doc.text('BTB Workshop 2025 - Feedback Report', 14, 20);
+        
+        // Statistics
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
+        doc.text(`Total Feedbacks: ${feedbacks.length}`, 14, 34);
+        
+        if (feedbackStats) {
+            doc.text(`Average Overall Rating: ${feedbackStats.averageRatings.avgOverall?.toFixed(2) || 0}/5`, 14, 40);
+            doc.text(`Recommendation Rate: ${feedbackStats.recommendPercentage}%`, 14, 46);
+        }
+        
+        // Table
+        const tableData = feedbacks.map(fb => [
+            fb.name,
+            fb.branch,
+            fb.year,
+            `${fb.rating}/5`,
+            `${fb.contentQuality}/5`,
+            `${fb.instructorKnowledge}/5`,
+            `${fb.venueRating}/5`,
+            fb.wouldRecommend ? 'Yes' : 'No',
+            fb.feedback.substring(0, 50) + '...'
+        ]);
+        
+        doc.autoTable({
+            startY: 52,
+            head: [['Name', 'Branch', 'Year', 'Overall', 'Content', 'Instructor', 'Venue', 'Recommend', 'Feedback']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: { fillColor: [6, 182, 212] },
+            styles: { fontSize: 8 }
+        });
+        
+        doc.save(`BTB_Feedbacks_${new Date().toISOString().split('T')[0]}.pdf`);
+    };
+
+    const StarDisplay = ({ rating }) => {
+        return (
+            <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                        key={star}
+                        className={`w-4 h-4 ${
+                            star <= rating ? 'text-yellow-400' : 'text-gray-600'
+                        }`}
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    </svg>
+                ))}
+            </div>
+        );
     };
 
     if (!isAuthenticated) {
@@ -264,11 +462,11 @@ export default function Admin() {
                     <div className="backdrop-blur-md bg-orange-900/20 border border-orange-400/30 rounded-lg p-4 md:p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-orange-400 font-mono text-xs md:text-sm">Not Checked In</p>
-                                <p className="text-3xl md:text-4xl font-bold text-white mt-2">{statistics.notCheckedIn}</p>
+                                <p className="text-orange-400 font-mono text-xs md:text-sm">Total Feedbacks</p>
+                                <p className="text-3xl md:text-4xl font-bold text-white mt-2">{feedbackStats?.total || 0}</p>
                             </div>
                             <svg className="w-10 h-10 md:w-12 md:h-12 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                             </svg>
                         </div>
                     </div>
@@ -277,7 +475,7 @@ export default function Admin() {
                 {/* Tabs */}
                 <div className="backdrop-blur-md bg-[rgb(21,24,33)]/60 border border-cyan-400/30 rounded-lg shadow-[0_0_30px_rgba(6,182,212,0.2)]">
                     <div className="flex border-b border-cyan-400/20 overflow-x-auto">
-                        {['registrations', 'scan'].map((tab) => (
+                        {['registrations', 'scan', 'feedbacks'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => {
@@ -292,6 +490,7 @@ export default function Admin() {
                             >
                                 {tab === 'registrations' && '📋 Registrations'}
                                 {tab === 'scan' && '📷 Scan QR'}
+                                {tab === 'feedbacks' && '⭐ Feedbacks'}
                             </button>
                         ))}
                     </div>
@@ -300,7 +499,7 @@ export default function Admin() {
                         {/* Registrations Tab */}
                         {activeTab === 'registrations' && (
                             <div>
-                                {/* Search and Filter */}
+                                {/* Search and Actions */}
                                 <div className="flex flex-col md:flex-row gap-4 mb-6">
                                     <input
                                         type="text"
@@ -318,6 +517,12 @@ export default function Admin() {
                                         <option value="checked-in">Checked In</option>
                                         <option value="not-checked-in">Not Checked In</option>
                                     </select>
+                                    <button
+                                        onClick={downloadRegistrationsExcel}
+                                        className="px-6 py-2 bg-green-500/20 border-2 border-green-400 text-green-400 font-mono rounded-lg hover:bg-green-500/30 transition-all whitespace-nowrap"
+                                    >
+                                        📥 Download Excel
+                                    </button>
                                 </div>
 
                                 {/* Registrations Table */}
@@ -385,6 +590,18 @@ export default function Admin() {
                                             className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold font-mono rounded-lg border-2 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:shadow-[0_0_35px_rgba(6,182,212,0.7)] transition-all"
                                         >
                                             📷 Start Camera
+                                        </button>
+                                    </div>
+                                )}
+
+                                {scanError && (
+                                    <div className="text-center py-8">
+                                        <p className="text-red-400 font-mono mb-4">{scanError}</p>
+                                        <button
+                                            onClick={startScanner}
+                                            className="px-6 py-2 bg-cyan-500/20 border-2 border-cyan-400 text-cyan-400 font-mono rounded-lg hover:bg-cyan-500/30 transition-all"
+                                        >
+                                            Try Again
                                         </button>
                                     </div>
                                 )}
@@ -467,6 +684,169 @@ export default function Admin() {
                                                 Scan Next
                                             </button>
                                         </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Feedbacks Tab */}
+                        {activeTab === 'feedbacks' && (
+                            <div>
+                                {/* Analytics Section */}
+                                {feedbackStats && (
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                                        <div className="backdrop-blur-md bg-yellow-900/20 border border-yellow-400/30 rounded-lg p-4">
+                                            <p className="text-yellow-400 font-mono text-xs mb-2">Overall Experience</p>
+                                            <div className="flex items-center gap-2">
+                                                <StarDisplay rating={Math.round(feedbackStats.averageRatings.avgOverall || 0)} />
+                                                <span className="text-white font-bold text-lg">
+                                                    {(feedbackStats.averageRatings.avgOverall || 0).toFixed(1)}/5
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="backdrop-blur-md bg-blue-900/20 border border-blue-400/30 rounded-lg p-4">
+                                            <p className="text-blue-400 font-mono text-xs mb-2">Content Quality</p>
+                                            <div className="flex items-center gap-2">
+                                                <StarDisplay rating={Math.round(feedbackStats.averageRatings.avgContent || 0)} />
+                                                <span className="text-white font-bold text-lg">
+                                                    {(feedbackStats.averageRatings.avgContent || 0).toFixed(1)}/5
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="backdrop-blur-md bg-purple-900/20 border border-purple-400/30 rounded-lg p-4">
+                                            <p className="text-purple-400 font-mono text-xs mb-2">Instructor Knowledge</p>
+                                            <div className="flex items-center gap-2">
+                                                <StarDisplay rating={Math.round(feedbackStats.averageRatings.avgInstructor || 0)} />
+                                                <span className="text-white font-bold text-lg">
+                                                    {(feedbackStats.averageRatings.avgInstructor || 0).toFixed(1)}/5
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="backdrop-blur-md bg-green-900/20 border border-green-400/30 rounded-lg p-4">
+                                            <p className="text-green-400 font-mono text-xs mb-2">Venue & Arrangements</p>
+                                            <div className="flex items-center gap-2">
+                                                <StarDisplay rating={Math.round(feedbackStats.averageRatings.avgVenue || 0)} />
+                                                <span className="text-white font-bold text-lg">
+                                                    {(feedbackStats.averageRatings.avgVenue || 0).toFixed(1)}/5
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Recommendation Rate */}
+                                {feedbackStats && (
+                                    <div className="backdrop-blur-md bg-cyan-900/20 border border-cyan-400/30 rounded-lg p-6 mb-6">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-cyan-400 font-mono text-sm mb-2">Would Recommend</p>
+                                                <p className="text-4xl font-bold text-white">{feedbackStats.recommendPercentage}%</p>
+                                            </div>
+                                            <svg className="w-16 h-16 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Search and Download */}
+                                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                                    <input
+                                        type="text"
+                                        placeholder="Search by name, branch, year..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="flex-1 bg-[rgb(15,18,25)]/80 border border-cyan-400/30 rounded px-4 py-2 text-white font-mono text-sm focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all"
+                                    />
+                                    <button
+                                        onClick={downloadFeedbacksExcel}
+                                        className="px-6 py-2 bg-green-500/20 border-2 border-green-400 text-green-400 font-mono rounded-lg hover:bg-green-500/30 transition-all whitespace-nowrap"
+                                    >
+                                        📥 Excel
+                                    </button>
+                                    <button
+                                        onClick={downloadFeedbacksPDF}
+                                        className="px-6 py-2 bg-red-500/20 border-2 border-red-400 text-red-400 font-mono rounded-lg hover:bg-red-500/30 transition-all whitespace-nowrap"
+                                    >
+                                        📄 PDF
+                                    </button>
+                                </div>
+
+                                {/* Feedbacks List */}
+                                {loading ? (
+                                    <div className="text-center py-8">
+                                        <div className="animate-spin w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full mx-auto"></div>
+                                        <p className="text-gray-400 font-mono mt-4">Loading...</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {feedbacks.map((fb) => (
+                                            <div key={fb._id} className="backdrop-blur-sm bg-[rgb(15,18,25)]/80 border border-purple-400/30 rounded-lg p-6">
+                                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+                                                    <div>
+                                                        <h3 className="text-lg font-bold text-white font-mono">{fb.name}</h3>
+                                                        <p className="text-sm text-gray-400 font-mono">{fb.branch} • {fb.year}</p>
+                                                    </div>
+                                                    <div className="mt-2 md:mt-0">
+                                                        {fb.wouldRecommend ? (
+                                                            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-mono">👍 Recommends</span>
+                                                        ) : (
+                                                            <span className="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-mono">👎 Doesn't Recommend</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                                    <div>
+                                                        <p className="text-xs text-gray-400 font-mono mb-1">Overall</p>
+                                                        <StarDisplay rating={fb.rating} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-gray-400 font-mono mb-1">Content</p>
+                                                        <StarDisplay rating={fb.contentQuality} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-gray-400 font-mono mb-1">Instructor</p>
+                                                        <StarDisplay rating={fb.instructorKnowledge} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-gray-400 font-mono mb-1">Venue</p>
+                                                        <StarDisplay rating={fb.venueRating} />
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    <div>
+                                                        <p className="text-sm text-cyan-400 font-mono mb-1">Feedback:</p>
+                                                        <p className="text-sm text-gray-300">{fb.feedback}</p>
+                                                    </div>
+                                                    {fb.improvements && (
+                                                        <div>
+                                                            <p className="text-sm text-green-400 font-mono mb-1">Improvements:</p>
+                                                            <p className="text-sm text-gray-300">{fb.improvements}</p>
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        <p className="text-sm text-pink-400 font-mono mb-1">Next Event Suggestion:</p>
+                                                        <p className="text-sm text-gray-300">{fb.nextEventSuggestion}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-4 pt-4 border-t border-purple-400/20">
+                                                    <p className="text-xs text-gray-500 font-mono">
+                                                        Submitted: {new Date(fb.createdAt).toLocaleString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {feedbacks.length === 0 && (
+                                            <div className="text-center py-8 text-gray-400 font-mono">
+                                                No feedbacks found
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
