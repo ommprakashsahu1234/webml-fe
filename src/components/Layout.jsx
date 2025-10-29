@@ -6,6 +6,7 @@ import Footer from "./HeaderFooter/Footer";
 import Home from "./Body/Home";
 import Register from "./Body/Register";
 import Error404 from "./Body/Error404";
+import Admin from "./Body/Admin";
 
 function WhatsAppFloat() {
   const whatsappLink = "https://chat.whatsapp.com/LOwo3xdkUwPEFaQXmxH72B";
@@ -45,6 +46,15 @@ function Layout() {
     </div>
   );
 }
+function AdminLayout() {
+  return (
+    <div className="page-container flex flex-col min-h-screen">
+      <main className="flex-grow w-full">
+        <Outlet />
+      </main>
+    </div>
+  );
+}
 
 function Frame() {
   return (
@@ -55,6 +65,10 @@ function Frame() {
           <Route index element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/register" element={<Register />} />
+          <Route path="*" element={<Error404 />} />
+        </Route>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Admin />} />
           <Route path="*" element={<Error404 />} />
         </Route>
       </Routes>
