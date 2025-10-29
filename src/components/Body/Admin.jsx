@@ -92,7 +92,7 @@ export default function Admin() {
 
     const fetchStatistics = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/admin/statistics');
+            const res = await fetch('https://webml-be.vercel.app/api/admin/statistics');
             const data = await res.json();
             
             if (data.success) {
@@ -105,7 +105,7 @@ export default function Admin() {
 
     const handleScanQR = async (qrCode) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/admin/registrations/qr/${qrCode}`);
+            const res = await fetch(`https://webml-be.vercel.app/api/admin/registrations/qr/${qrCode}`);
             const data = await res.json();
 
             if (data.success) {
@@ -124,7 +124,7 @@ export default function Admin() {
         if (!scannedUser) return;
 
         try {
-            const res = await fetch(`http://localhost:5000/api/admin/registrations/checkin/${scannedUser._id}`, {
+            const res = await fetch(`https://webml-be.vercel.app/api/admin/registrations/checkin/${scannedUser._id}`, {
                 method: 'PUT'
             });
             const data = await res.json();
