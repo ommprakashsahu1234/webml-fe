@@ -90,7 +90,7 @@ export default function Admin() {
     const fetchRegistrations = async () => {
         setLoading(true);
         try {
-            let url = 'http://localhost:5000/api/admin/registrations?';
+            let url = 'https://webml-be.vercel.app/api/admin/registrations?';
             if (searchTerm) url += `search=${searchTerm}&`;
             if (filter !== 'all') url += `filter=${filter}`;
 
@@ -110,7 +110,7 @@ export default function Admin() {
     const fetchFeedbacks = async () => {
         setLoading(true);
         try {
-            let url = 'http://localhost:5000/api/feedback/all?';
+            let url = 'https://webml-be.vercel.app/api/feedback/all?';
             if (searchTerm) url += `search=${searchTerm}`;
 
             const res = await fetch(url);
@@ -128,7 +128,7 @@ export default function Admin() {
 
     const fetchFeedbackStats = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/feedback/stats');
+            const res = await fetch('https://webml-be.vercel.app/api/feedback/stats');
             const data = await res.json();
             
             if (data.success) {
@@ -141,7 +141,7 @@ export default function Admin() {
 
     const fetchStatistics = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/admin/statistics');
+            const res = await fetch('https://webml-be.vercel.app/api/admin/statistics');
             const data = await res.json();
             
             if (data.success) {
@@ -154,7 +154,7 @@ export default function Admin() {
 
     const handleScanQR = async (qrCode) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/admin/registrations/qr/${qrCode}`);
+            const res = await fetch(`https://webml-be.vercel.app/api/admin/registrations/qr/${qrCode}`);
             const data = await res.json();
 
             if (data.success) {
@@ -173,7 +173,7 @@ export default function Admin() {
         if (!scannedUser) return;
 
         try {
-            const res = await fetch(`http://localhost:5000/api/admin/registrations/checkin/${scannedUser._id}`, {
+            const res = await fetch(`https://webml-be.vercel.app/api/admin/registrations/checkin/${scannedUser._id}`, {
                 method: 'PUT'
             });
             const data = await res.json();

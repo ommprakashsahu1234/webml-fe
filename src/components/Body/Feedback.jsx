@@ -80,7 +80,7 @@ export default function Feedback() {
 
         setIsSubmitting(true);
         try {
-            const res = await fetch('http://localhost:5000/api/feedback/submit', {
+            const res = await fetch('https://webml-be.vercel.app/api/feedback/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
