@@ -73,7 +73,7 @@ export default function Admin() {
     const fetchRegistrations = async () => {
         setLoading(true);
         try {
-            let url = 'http://localhost:5000/api/admin/registrations?';
+            let url = 'https://webml-be.vercel.app/api/admin/registrations';
             if (searchTerm) url += `search=${searchTerm}&`;
             if (filter !== 'all') url += `filter=${filter}`;
 
