@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import jsPDF from 'jspdf';
-// import html2canvas from 'html2canvas';
+// Import logos
+import gitaLogo from '../../../public/gita.png';  // Update path as needed
+import csiLogo from '../../../public/csi.png';     // Update path as needed
 // Import signature images
-import domtoimage from 'dom-to-image-more';
 import csiSign from '../../../public/Signature.jpg';
 import principalSign from '../../../public/Signature.jpg';
 
@@ -31,206 +32,247 @@ export default function Certificate() {
         return () => window.removeEventListener('resize', checkMobile);
     }, [navigate]);
 
-const downloadCertificate = async () => {
-    setIsDownloading(true);
-    try {
-        // Create PDF in landscape A4 (jsPDF is already imported at top)
-        const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: 'a4'
-        });
-
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const margin = 15;
-
-        // === BACKGROUND & BORDERS ===
-        // Outer golden border
-        pdf.setDrawColor(218, 165, 32); // Gold
-        pdf.setLineWidth(3);
-        pdf.rect(5, 5, pageWidth - 10, pageHeight - 10);
-
-        // Teal border
-        pdf.setDrawColor(15, 118, 110); // Teal
-        pdf.setLineWidth(2);
-        pdf.rect(8, 8, pageWidth - 16, pageHeight - 16);
-
-        // Inner border
-        pdf.setDrawColor(202, 138, 4); // Dark yellow
-        pdf.setLineWidth(1.5);
-        pdf.rect(margin, margin, pageWidth - (margin * 2), pageHeight - (margin * 2));
-
-        // === CORNER DECORATIONS ===
-        const cornerSize = 20;
-        pdf.setDrawColor(15, 118, 110);
-        pdf.setLineWidth(2);
-
-        // Top-left
-        pdf.line(margin, margin, margin + cornerSize, margin);
-        pdf.line(margin, margin, margin, margin + cornerSize);
-
-        // Top-right
-        pdf.line(pageWidth - margin, margin, pageWidth - margin - cornerSize, margin);
-        pdf.line(pageWidth - margin, margin, pageWidth - margin, margin + cornerSize);
-
-        // Bottom-left
-        pdf.line(margin, pageHeight - margin, margin + cornerSize, pageHeight - margin);
-        pdf.line(margin, pageHeight - margin, margin, pageHeight - margin - cornerSize);
-
-        // Bottom-right
-        pdf.line(pageWidth - margin, pageHeight - margin, pageWidth - margin - cornerSize, pageHeight - margin);
-        pdf.line(pageWidth - margin, pageHeight - margin, pageWidth - margin, pageHeight - margin - cornerSize);
-
-        // === HEADER ===
-        pdf.setFontSize(40);
-        pdf.setFont('times', 'bold');
-        pdf.setTextColor(31, 41, 55); // Gray-800
-        pdf.text('Certificate of Participation', pageWidth / 2, 40, { align: 'center' });
-
-        // Decorative lines
-        pdf.setDrawColor(202, 138, 4);
-        pdf.setLineWidth(0.5);
-        pdf.line(80, 48, 115, 48);
-        pdf.line(pageWidth - 80, 48, pageWidth - 115, 48);
-
-        // "This is awarded to" text
-        pdf.setFontSize(14);
-        pdf.setFont('times', 'italic');
-        pdf.setTextColor(75, 85, 99); // Gray-600
-        pdf.text('This is awarded to', pageWidth / 2, 55, { align: 'center' });
-
-        // === NAME SECTION ===
-        pdf.setFontSize(32);
-        pdf.setFont('times', 'bold');
-        pdf.setTextColor(15, 118, 110); // Teal-700
-        pdf.text(userData.name, pageWidth / 2, 75, { align: 'center' });
-
-        // Underline for name
-        const nameWidth = pdf.getTextWidth(userData.name);
-        pdf.setDrawColor(156, 163, 175); // Gray-400
-        pdf.setLineWidth(0.8);
-        pdf.line((pageWidth - nameWidth) / 2, 78, (pageWidth + nameWidth) / 2, 78);
-
-        // Student details
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(75, 85, 99); // Gray-600
-        pdf.text(`${userData.branch} - ${userData.year} Year | Roll No: ${userData.roll}`, pageWidth / 2, 88, { align: 'center' });
-
-        // === BODY TEXT ===
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(55, 65, 81); // Gray-700
-        pdf.text('For the participation in the completion of', pageWidth / 2, 105, { align: 'center' });
-
-        // Workshop title
-        pdf.setFontSize(18);
-        pdf.setFont('helvetica', 'bold');
-        pdf.setTextColor(15, 118, 110); // Teal-700
-        pdf.text('"BEHIND THE BROWSER"', pageWidth / 2, 115, { align: 'center' });
-
-        // Workshop description
-        pdf.setFontSize(11);
-        pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(75, 85, 99); // Gray-600
-
-        const descLine1 = 'A workshop on Node.js & Express.js server development and implementation,';
-        const descLine2 = 'organized by Computer Society of India (CSI) in collaboration with';
-        const descLine3 = 'the Department of CSE, GITA Autonomous College.';
-
-        pdf.text(descLine1, pageWidth / 2, 127, { align: 'center' });
-        pdf.text(descLine2, pageWidth / 2, 134, { align: 'center' });
-        pdf.text(descLine3, pageWidth / 2, 141, { align: 'center' });
-
-        // Date
-        pdf.setFontSize(10);
-        pdf.setTextColor(107, 114, 128); // Gray-500
-        pdf.text('Date: 1st November, 2025', pageWidth / 2, 151, { align: 'center' });
-
-        // === SIGNATURES ===
-        const signY = pageHeight - 45;
-        const leftX = 55;
-        const rightX = pageWidth - 55;
-
-        // Add signature images if available
+    const downloadCertificate = async () => {
+        setIsDownloading(true);
         try {
-            // Convert images to base64 or use them directly
-            pdf.addImage(csiSign, 'JPEG', leftX - 20, signY - 15, 40, 12);
-            pdf.addImage(principalSign, 'JPEG', rightX - 20, signY - 15, 40, 12);
-        } catch (e) {
-            console.log('Signature images not added:', e.message);
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 15;
+
+            // === BACKGROUND & BORDERS ===
+            pdf.setDrawColor(218, 165, 32);
+            pdf.setLineWidth(3);
+            pdf.rect(5, 5, pageWidth - 10, pageHeight - 10);
+
+            pdf.setDrawColor(15, 118, 110);
+            pdf.setLineWidth(2);
+            pdf.rect(8, 8, pageWidth - 16, pageHeight - 16);
+
+            pdf.setDrawColor(202, 138, 4);
+            pdf.setLineWidth(1.5);
+            pdf.rect(margin, margin, pageWidth - (margin * 2), pageHeight - (margin * 2));
+
+            // === ADD LOGOS ===
+            try {
+                // Left logo - GITA
+                pdf.addImage(gitaLogo, 'PNG', margin + 5, margin + 5, 20, 20);
+                pdf.setFontSize(7);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(75, 85, 99);
+                pdf.text('GITA Autonomous', margin + 15, margin + 28, { align: 'center' });
+                pdf.text('College', margin + 15, margin + 32, { align: 'center' });
+
+                // Right logo - CSI
+                pdf.addImage(csiLogo, 'PNG', pageWidth - margin - 25, margin + 5, 20, 20);
+                pdf.text('Computer Society', pageWidth - margin - 15, margin + 28, { align: 'center' });
+                pdf.text('of India (CSI)', pageWidth - margin - 15, margin + 32, { align: 'center' });
+            } catch (e) {
+                console.log('Logos not added:', e.message);
+            }
+
+            // === CORNER DECORATIONS ===
+            const cornerSize = 20;
+            pdf.setDrawColor(15, 118, 110);
+            pdf.setLineWidth(2);
+
+            pdf.line(margin, margin, margin + cornerSize, margin);
+            pdf.line(margin, margin, margin, margin + cornerSize);
+
+            pdf.line(pageWidth - margin, margin, pageWidth - margin - cornerSize, margin);
+            pdf.line(pageWidth - margin, margin, pageWidth - margin, margin + cornerSize);
+
+            pdf.line(margin, pageHeight - margin, margin + cornerSize, pageHeight - margin);
+            pdf.line(margin, pageHeight - margin, margin, pageHeight - margin - cornerSize);
+
+            pdf.line(pageWidth - margin, pageHeight - margin, pageWidth - margin - cornerSize, pageHeight - margin);
+            pdf.line(pageWidth - margin, pageHeight - margin, pageWidth - margin, pageHeight - margin - cornerSize);
+
+            // === HEADER ===
+            pdf.setFontSize(40);
+            pdf.setFont('times', 'bold');
+            pdf.setTextColor(31, 41, 55);
+            pdf.text('Certificate of Participation', pageWidth / 2, 40, { align: 'center' });
+
+            pdf.setDrawColor(202, 138, 4);
+            pdf.setLineWidth(0.5);
+            pdf.line(80, 48, 115, 48);
+            pdf.line(pageWidth - 80, 48, pageWidth - 115, 48);
+
+            pdf.setFontSize(14);
+            pdf.setFont('times', 'italic');
+            pdf.setTextColor(75, 85, 99);
+            pdf.text('This is awarded to', pageWidth / 2, 55, { align: 'center' });
+
+            // === NAME SECTION ===
+            pdf.setFontSize(32);
+            pdf.setFont('times', 'bold');
+            pdf.setTextColor(15, 118, 110);
+            pdf.text(userData.name, pageWidth / 2, 75, { align: 'center' });
+
+            const nameWidth = pdf.getTextWidth(userData.name);
+            pdf.setDrawColor(156, 163, 175);
+            pdf.setLineWidth(0.8);
+            pdf.line((pageWidth - nameWidth) / 2, 78, (pageWidth + nameWidth) / 2, 78);
+
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(75, 85, 99);
+            pdf.text(`${userData.branch} - ${userData.year} Year | Roll No: ${userData.roll}`, pageWidth / 2, 88, { align: 'center' });
+
+            // === BODY TEXT ===
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(55, 65, 81);
+            pdf.text('For the participation in the completion of', pageWidth / 2, 105, { align: 'center' });
+
+            pdf.setFontSize(18);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(15, 118, 110);
+            pdf.text('"BEHIND THE BROWSER"', pageWidth / 2, 115, { align: 'center' });
+
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(75, 85, 99);
+
+            const descLine1 = 'A workshop on Node.js & Express.js server development and implementation,';
+            const descLine2 = 'organized by Computer Society of India (CSI) in collaboration with';
+            const descLine3 = 'the Department of CSE, GITA Autonomous College.';
+
+            pdf.text(descLine1, pageWidth / 2, 127, { align: 'center' });
+            pdf.text(descLine2, pageWidth / 2, 134, { align: 'center' });
+            pdf.text(descLine3, pageWidth / 2, 141, { align: 'center' });
+
+            pdf.setFontSize(10);
+            pdf.setTextColor(107, 114, 128);
+            pdf.text('Date: 1st November, 2025', pageWidth / 2, 151, { align: 'center' });
+
+            // === SIGNATURES WITH ROTATION FIX ===
+            const signY = pageHeight - 45;
+            const leftX = 55;
+            const rightX = pageWidth - 55;
+
+            try {
+                // Function to rotate image
+                const rotateAndAddImage = async (imgSrc, x, y, width, height, rotation = 0) => {
+                    return new Promise((resolve) => {
+                        const img = new Image();
+                        img.crossOrigin = 'anonymous';
+                        img.onload = function () {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+
+                            // Set canvas dimensions based on rotation
+                            if (rotation === 90 || rotation === 270) {
+                                canvas.width = img.height;
+                                canvas.height = img.width;
+                            } else {
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                            }
+
+                            // Rotate and draw
+                            ctx.save();
+                            if (rotation === 90) {
+                                ctx.translate(canvas.width, 0);
+                                ctx.rotate(90 * Math.PI / 180);
+                            } else if (rotation === 270 || rotation === -90) {
+                                ctx.translate(0, canvas.height);
+                                ctx.rotate(-90 * Math.PI / 180);
+                            } else if (rotation === 180) {
+                                ctx.translate(canvas.width, canvas.height);
+                                ctx.rotate(180 * Math.PI / 180);
+                            }
+
+                            ctx.drawImage(img, 0, 0);
+                            ctx.restore();
+
+                            const rotatedImg = canvas.toDataURL('image/png');
+                            pdf.addImage(rotatedImg, 'PNG', x, y, width, height);
+                            resolve();
+                        };
+                        img.onerror = () => {
+                            console.log('Image load error');
+                            resolve();
+                        };
+                        img.src = imgSrc;
+                    });
+                };
+
+                await rotateAndAddImage(csiSign, leftX - 20, signY - 15, 40, 12, 0);
+                await rotateAndAddImage(principalSign, rightX - 20, signY - 15, 40, 12, 0);
+
+
+            } catch (e) {
+                console.log('Signature images not added:', e.message);
+            }
+
+            pdf.setDrawColor(31, 41, 55);
+            pdf.setLineWidth(0.8);
+            pdf.line(leftX - 25, signY, leftX + 25, signY);
+
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(55, 65, 81);
+            pdf.text('CSI Co-ordinator', leftX, signY + 6, { align: 'center' });
+
+            pdf.setFontSize(8);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(107, 114, 128);
+            pdf.text('Computer Society of India', leftX, signY + 11, { align: 'center' });
+
+            pdf.line(rightX - 25, signY, rightX + 25, signY);
+
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(55, 65, 81);
+            pdf.text('Principal', rightX, signY + 6, { align: 'center' });
+
+            pdf.setFontSize(8);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(107, 114, 128);
+            pdf.text('GITA Autonomous College', rightX, signY + 11, { align: 'center' });
+
+            // === CENTER STAR BADGE ===
+            const starX = pageWidth / 2;
+            const starY = signY;
+            const starRadius = 8;
+
+            pdf.setFillColor(234, 179, 8);
+            pdf.setDrawColor(202, 138, 4);
+            pdf.setLineWidth(1.5);
+            pdf.circle(starX, starY, starRadius, 'FD');
+
+            // Draw star properly
+            pdf.setFontSize(16);
+            pdf.setTextColor(133, 77, 14);
+            pdf.text('★', starX, starY + 2, { align: 'center' });
+
+            pdf.save(`BTB_Certificate_${userData.roll}.pdf`);
+
+            await fetch('https://webml-be.vercel.app/api/certificate/record-download', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: userData.email,
+                    roll: userData.roll
+                })
+            }).catch(err => console.error('Download tracking error:', err));
+
+            alert('✅ Certificate downloaded successfully!');
+
+        } catch (error) {
+            console.error('Error generating certificate:', error);
+            alert('❌ Error generating certificate: ' + error.message);
+        } finally {
+            setIsDownloading(false);
         }
-
-        // Left signature line
-        pdf.setDrawColor(31, 41, 55); // Gray-800
-        pdf.setLineWidth(0.8);
-        pdf.line(leftX - 25, signY, leftX + 25, signY);
-
-        pdf.setFontSize(9);
-        pdf.setFont('helvetica', 'bold');
-        pdf.setTextColor(55, 65, 81);
-        pdf.text('CSI Co-ordinator', leftX, signY + 6, { align: 'center' });
-
-        pdf.setFontSize(8);
-        pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(107, 114, 128);
-        pdf.text('Computer Society of India', leftX, signY + 11, { align: 'center' });
-
-        // Right signature line
-        pdf.line(rightX - 25, signY, rightX + 25, signY);
-
-        pdf.setFontSize(9);
-        pdf.setFont('helvetica', 'bold');
-        pdf.setTextColor(55, 65, 81);
-        pdf.text('Principal', rightX, signY + 6, { align: 'center' });
-
-        pdf.setFontSize(8);
-        pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(107, 114, 128);
-        pdf.text('GITA Autonomous College', rightX, signY + 11, { align: 'center' });
-
-        // === CENTER STAR BADGE ===
-        const starX = pageWidth / 2;
-        const starY = signY;
-        const starRadius = 8;
-
-        // Gold circle
-        pdf.setFillColor(234, 179, 8); // Yellow-500
-        pdf.setDrawColor(202, 138, 4); // Yellow-600
-        pdf.setLineWidth(1.5);
-        pdf.circle(starX, starY, starRadius, 'FD');
-
-        // Star
-        pdf.setFontSize(16);
-        pdf.setTextColor(133, 77, 14); // Yellow-800
-        pdf.text('★', starX, starY + 2, { align: 'center' });
-
-        // Save PDF
-        pdf.save(`BTB_Certificate_${userData.roll}.pdf`);
-
-        // Record download
-        await fetch('https://webml-be.vercel.app/api/certificate/record-download', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: userData.email,
-                roll: userData.roll
-            })
-        }).catch(err => console.error('Download tracking error:', err));
-
-        alert('✅ Certificate downloaded successfully!');
-
-    } catch (error) {
-        console.error('Error generating certificate:', error);
-        alert('❌ Error generating certificate: ' + error.message);
-    } finally {
-        setIsDownloading(false);
-    }
-};
-
-
-
+    };
 
 
     if (!userData) {
@@ -259,15 +301,40 @@ const downloadCertificate = async () => {
 
                 {/* Certificate Preview Container */}
                 <div className="bg-white border border-cyan-400/30 rounded-lg p-2 md:p-8 shadow-lg mb-6 md:mb-8">
-                    <div ref={certificateRef} className="bg-white" style={{
+                    <div ref={certificateRef} className="bg-white relative" style={{
                         width: '100%',
                         aspectRatio: isMobile ? 'auto' : '1.414/1',
                         minHeight: isMobile ? '600px' : 'auto'
                     }}>
                         {/* Certificate Design */}
-                        <div className={`relative h-full border-4 md:border-8 border-double ${isMobile ? 'border-yellow-600' : 'border-yellow-600'
-                            } ${isMobile ? 'p-4' : 'p-10'}`}>
-                            {/* Corner Decorations - Smaller on mobile */}
+                        <div className={`relative h-full border-4 md:border-8 border-double border-yellow-600 ${isMobile ? 'p-4' : 'p-10'}`}>
+
+                            {/* LOGOS OVERLAY - USING Z-INDEX */}
+                            <div className="absolute top-4 left-4 md:top-8 md:left-8 z-50 flex flex-col items-center bg-white/90 backdrop-blur-sm rounded-lg p-2">
+                                <img
+                                    src={gitaLogo}
+                                    alt="GITA Logo"
+                                    className={`${isMobile ? 'w-12 h-12' : 'w-16 h-16'} object-contain mb-1`}
+                                    onError={(e) => e.target.style.display = 'none'}
+                                />
+                                <p className={`${isMobile ? 'text-[7px]' : 'text-[9px]'} text-gray-700 text-center font-semibold leading-tight`}>
+                                    GITA Autonomous<br />College
+                                </p>
+                            </div>
+
+                            <div className="absolute top-4 right-4 md:top-8 md:right-8 z-50 flex flex-col items-center bg-white/90 backdrop-blur-sm rounded-lg p-2">
+                                <img
+                                    src={csiLogo}
+                                    alt="CSI Logo"
+                                    className={`${isMobile ? 'w-12 h-12' : 'w-16 h-16'} object-contain mb-1`}
+                                    onError={(e) => e.target.style.display = 'none'}
+                                />
+                                <p className={`${isMobile ? 'text-[7px]' : 'text-[9px]'} text-gray-700 text-center font-semibold leading-tight`}>
+                                    Computer Society<br />of India (CSI)
+                                </p>
+                            </div>
+
+                            {/* Corner Decorations */}
                             <div className={`absolute top-0 left-0 ${isMobile ? 'w-16 h-16' : 'w-32 h-32'} border-t-2 md:border-t-4 border-l-2 md:border-l-4 border-teal-700`}></div>
                             <div className={`absolute top-0 right-0 ${isMobile ? 'w-16 h-16' : 'w-32 h-32'} border-t-2 md:border-t-4 border-r-2 md:border-r-4 border-teal-700`}></div>
                             <div className={`absolute bottom-0 left-0 ${isMobile ? 'w-16 h-16' : 'w-32 h-32'} border-b-2 md:border-b-4 border-l-2 md:border-l-4 border-teal-700`}></div>
@@ -318,12 +385,10 @@ const downloadCertificate = async () => {
                                     </p>
                                 </div>
 
-                                {/* Signatures Section - Responsive */}
+                                {/* Signatures Section */}
                                 <div className={`flex ${isMobile ? 'flex-col gap-4' : 'justify-between items-end'} mt-auto ${isMobile ? 'pt-3 px-4 pb-4' : 'pt-4 px-12 pb-6'}`}>
-                                    {/* Mobile Layout */}
                                     {isMobile ? (
                                         <>
-                                            {/* CSI Coordinator */}
                                             <div className="flex justify-between items-end border-t border-gray-300 pt-3">
                                                 <div className="text-left flex-1">
                                                     <div className="mb-1" style={{ height: '30px' }}>
@@ -340,7 +405,6 @@ const downloadCertificate = async () => {
                                                     <p className="text-[8px] text-gray-500 leading-tight">Computer Society of India</p>
                                                 </div>
 
-                                                {/* Star Badge */}
                                                 <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center border-2 border-yellow-600 shadow-lg">
                                                     <svg className="w-6 h-6 text-yellow-800" fill="currentColor" viewBox="0 0 24 24">
                                                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -348,7 +412,6 @@ const downloadCertificate = async () => {
                                                 </div>
                                             </div>
 
-                                            {/* Principal */}
                                             <div className="text-right">
                                                 <div className="mb-1 flex justify-end" style={{ height: '30px' }}>
                                                     <img
@@ -365,9 +428,7 @@ const downloadCertificate = async () => {
                                             </div>
                                         </>
                                     ) : (
-                                        /* Desktop Layout */
                                         <>
-                                            {/* CSI Coordinator Signature */}
                                             <div className="text-center flex flex-col items-center" style={{ width: '35%' }}>
                                                 <div className="mb-1 flex items-end justify-center" style={{ height: '50px' }}>
                                                     <img
@@ -383,7 +444,6 @@ const downloadCertificate = async () => {
                                                 <p className="text-[10px] text-gray-500 leading-tight">Computer Society of India</p>
                                             </div>
 
-                                            {/* Center Badge */}
                                             <div className="flex items-end justify-center" style={{ width: '25%' }}>
                                                 <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center border-4 border-yellow-600 shadow-lg mb-3">
                                                     <svg className="w-8 h-8 text-yellow-800" fill="currentColor" viewBox="0 0 24 24">
@@ -392,7 +452,6 @@ const downloadCertificate = async () => {
                                                 </div>
                                             </div>
 
-                                            {/* Principal Signature */}
                                             <div className="text-center flex flex-col items-center" style={{ width: '35%' }}>
                                                 <div className="mb-1 flex items-end justify-center" style={{ height: '50px' }}>
                                                     <img
@@ -473,33 +532,6 @@ const downloadCertificate = async () => {
                     </a>
                 </div>
             </div>
-            <style>{`
-    @media print {
-        * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
-    }
-    
-    /* Ensure text doesn't wrap unexpectedly */
-    [ref="certificateRef"] * {
-        box-sizing: border-box;
-    }
-    
-    /* Force RGB colors for better compatibility */
-    .certificate-colors {
-        --yellow-600: rgb(202, 138, 4);
-        --teal-700: rgb(15, 118, 110);
-        --gray-800: rgb(31, 41, 55);
-        --gray-700: rgb(55, 65, 81);
-        --gray-600: rgb(75, 85, 99);
-        --gray-500: rgb(107, 114, 128);
-        --gray-400: rgb(156, 163, 175);
-        --yellow-500: rgb(234, 179, 8);
-    }
-`}</style>
-
         </div>
-
     );
 }
