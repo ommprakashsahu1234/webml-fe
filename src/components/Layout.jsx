@@ -8,6 +8,8 @@ import Register from "./Body/Register";
 import Error404 from "./Body/Error404";
 import Admin from "./Body/Admin";
 import Feedback from "./Body/Feedback";
+import CertificateAuth from "./Body/CertificateAuth";
+import Certificate from "./Body/Certificate";
 
 function WhatsAppFloat() {
   const whatsappLink = "https://chat.whatsapp.com/FiacXtKfEvp3n5XTmYUuTm";
@@ -67,6 +69,8 @@ function Frame() {
           <Route path="/home" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/feedback" element={<Feedback />} />
+          <Route path="/certificate" element={<Certificate />} />
+          <Route path="/certificate-auth" element={<CertificateAuth />} />
           <Route path="*" element={<Error404 />} />
         </Route>
         <Route path="/admin" element={<AdminLayout />}>
