@@ -10,7 +10,7 @@ import Admin from "./Body/Admin";
 import Feedback from "./Body/Feedback";
 
 function WhatsAppFloat() {
-  const whatsappLink = "https://chat.whatsapp.com/LOwo3xdkUwPEFaQXmxH72B";
+  const whatsappLink = "https://chat.whatsapp.com/FiacXtKfEvp3n5XTmYUuTm";
   return (
     <a
       href={whatsappLink}
