@@ -379,7 +379,7 @@ export default function Home() {
             {[
               {
                 name: 'Omm Prakash Sahu',
-                role: 'Lead Organizer',
+                role: 'MERN Stack Developer',
                 profile: omm,
                 links: {
                   github: 'https://github.com/ommprakashsahu1234',
@@ -390,24 +390,24 @@ export default function Home() {
               },
               {
                 name: 'Jaynarayan Panda',
-                role: 'Co-Organizer',
+                role: 'AI-ML Enthusiast',
                 profile: jay,
                 links: {
                   github: 'https://github.com/Jaypanda28',
                   linkedin: 'https://www.linkedin.com/in/jaynarayan-panda-8531831b6',
                   portfolio: 'https://jaynarayanportfolio.netlify.app',
-                  email: 'pandajaynarayan49@gmail.com'
+                  email: 'mailto:pandajaynarayan49@gmail.com'
                 }
               },
               {
                 name: 'Jyoti Swarup Parhi',
-                role: 'Technical Lead',
+                role: 'Cloud Enthusiast',
                 profile: jyoti,
                 links: {
                   github: 'https://github.com/Jyoti-jitu',
                   linkedin: 'http://www.linkedin.com/in/jyoti-swarup',
                   portfolio: 'https://github.com/Jyoti-jitu/Bput-Smartreach',
-                  email: 'jspbp2005@gmail.com'
+                  email: 'mailto:jspbp2005@gmail.com'
                 }
               }
             ].map((organizer, index) => (
