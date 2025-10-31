@@ -5,8 +5,9 @@ import jsPDF from 'jspdf';
 import gitaLogo from '../../../public/gita.png';  // Update path as needed
 import csiLogo from '../../../public/csi.png';     // Update path as needed
 // Import signature images
-import csiSign from '../../../public/Signature.jpg';
-import principalSign from '../../../public/Signature.jpg';
+import hodsign from '../../signatures/hod.jpg'
+import surensign from '../../signatures/suren.jpg';
+import principalSign from '../../signatures/principal.jpg';
 
 export default function Certificate() {
     const [userData, setUserData] = useState(null);

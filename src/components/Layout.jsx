@@ -69,7 +69,7 @@ function Frame() {
           <Route index element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/register" element={<RegistrationClosed />} />
-          <Route path="/registernew" element={<Register />} />
+          <Route path="/registerhere" element={<Register />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/certificate" element={<Certificate />} />
           <Route path="/certificate-auth" element={<CertificateAuth />} />
