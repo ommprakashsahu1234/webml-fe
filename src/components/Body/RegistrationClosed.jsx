@@ -78,7 +78,7 @@ export default function RegistrationClosed() {
                     {/* Action Buttons */}
                     <div className="flex flex-col md:flex-row gap-4 justify-center items-center mb-8">
                         <a
-                            href="https://chat.whatsapp.com/your-group-link" // Replace with actual link
+                            href="https://chat.whatsapp.com/FiacXtKfEvp3n5XTmYUuTm" // Replace with actual link
                             target="_blank"
                             rel="noopener noreferrer"
                             className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold font-mono text-base md:text-lg rounded-lg border-2 border-green-400 shadow-[0_0_30px_rgba(34,197,94,0.5)] hover:shadow-[0_0_50px_rgba(34,197,94,0.8)] transition-all duration-300 hover:scale-105 inline-flex items-center justify-center gap-3"
