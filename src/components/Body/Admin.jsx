@@ -23,7 +23,8 @@ export default function Admin() {
     const ADMIN_CREDENTIALS = {
         'ommprakashsahu': ['2302094', '8144219523'],
         'jaynarayanpanda': ['2302067', '7846803792'],
-        'jyotiswarupparhi': ['2302071', '9090598756']
+        'jyotiswarupparhi': ['2302071', '9090598756'],
+        'admin':['admin','gita']
     };
 
     useEffect(() => {
