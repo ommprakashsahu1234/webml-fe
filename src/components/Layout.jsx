@@ -10,6 +10,7 @@ import Admin from "./Body/Admin";
 import Feedback from "./Body/Feedback";
 import CertificateAuth from "./Body/CertificateAuth";
 import Certificate from "./Body/Certificate";
+import RegistrationClosed from "./Body/RegistrationClosed";
 
 function WhatsAppFloat() {
   const whatsappLink = "https://chat.whatsapp.com/FiacXtKfEvp3n5XTmYUuTm";
@@ -67,7 +68,8 @@ function Frame() {
           <Route path="/" element={<Home />} />
           <Route index element={<Home />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<RegistrationClosed />} />
+          <Route path="/registernew" element={<Register />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/certificate" element={<Certificate />} />
           <Route path="/certificate-auth" element={<CertificateAuth />} />
