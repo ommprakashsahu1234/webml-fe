@@ -24,7 +24,7 @@ export default function Admin() {
         'ommprakashsahu': ['2302094', '8144219523'],
         'jaynarayanpanda': ['2302067', '7846803792'],
         'jyotiswarupparhi': ['2302071', '9090598756'],
-        'admin':['admin','gita']
+        'admin': ['admin', 'gita']
     };
 
     useEffect(() => {
@@ -61,11 +61,11 @@ export default function Admin() {
         if (!password) return;
 
         const normalizedUsername = username.toLowerCase().replace(/\s/g, '');
-        
-        if (ADMIN_CREDENTIALS[normalizedUsername] && 
+
+        if (ADMIN_CREDENTIALS[normalizedUsername] &&
             ADMIN_CREDENTIALS[normalizedUsername].includes(password)) {
-            
-            Cookies.set('btb_admin_auth', normalizedUsername, { expires: 1/96 });
+
+            Cookies.set('btb_admin_auth', normalizedUsername, { expires: 1 / 96 });
             setIsAuthenticated(true);
             fetchData();
             alert('✅ Login Successful!');
@@ -97,7 +97,7 @@ export default function Admin() {
 
             const res = await fetch(url);
             const data = await res.json();
-            
+
             if (data.success) {
                 setRegistrations(data.data);
             }
@@ -116,7 +116,7 @@ export default function Admin() {
 
             const res = await fetch(url);
             const data = await res.json();
-            
+
             if (data.success) {
                 setFeedbacks(data.data);
             }
@@ -131,7 +131,7 @@ export default function Admin() {
         try {
             const res = await fetch('https://webml-be.vercel.app/api/feedback/stats');
             const data = await res.json();
-            
+
             if (data.success) {
                 setFeedbackStats(data.data);
             }
@@ -144,7 +144,7 @@ export default function Admin() {
         try {
             const res = await fetch('https://webml-be.vercel.app/api/admin/statistics');
             const data = await res.json();
-            
+
             if (data.success) {
                 setStatistics(data.data);
             }
@@ -161,9 +161,9 @@ export default function Admin() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ isShortlisted: !currentStatus })
             });
-            
+
             const data = await res.json();
-            
+
             if (data.success) {
                 alert(`✅ ${data.message}`);
                 fetchRegistrations();
@@ -180,14 +180,14 @@ export default function Admin() {
     // NEW: Delete registration
     const handleDelete = async (id, name) => {
         if (!confirm(`Are you sure you want to delete ${name}'s registration?`)) return;
-        
+
         try {
             const res = await fetch(`https://webml-be.vercel.app/api/admin/registration/${id}`, {
                 method: 'DELETE'
             });
-            
+
             const data = await res.json();
-            
+
             if (data.success) {
                 alert('✅ Registration deleted successfully!');
                 fetchRegistrations();
@@ -204,14 +204,14 @@ export default function Admin() {
     // NEW: Manual check-in
     const handleManualCheckIn = async (id, name) => {
         if (!confirm(`Check in ${name}?`)) return;
-        
+
         try {
             const res = await fetch(`https://webml-be.vercel.app/api/admin/registrations/checkin/${id}`, {
                 method: 'PUT'
             });
-            
+
             const data = await res.json();
-            
+
             if (data.success) {
                 alert(`✅ ${name} checked in successfully!`);
                 fetchRegistrations();
@@ -284,7 +284,7 @@ export default function Admin() {
                 handleScanQR(decodedText);
             };
 
-            const config = { 
+            const config = {
                 fps: 10,
                 qrbox: { width: 250, height: 250 },
                 aspectRatio: 1.0
@@ -307,7 +307,7 @@ export default function Admin() {
         } catch (err) {
             console.error('Error starting scanner:', err);
             setIsScanning(false);
-            
+
             if (err.name === 'NotAllowedError') {
                 setScanError('❌ Camera permission denied. Please allow camera access.');
             } else if (err.name === 'NotFoundError') {
@@ -354,7 +354,7 @@ export default function Admin() {
                 'Registration Date': new Date(reg.createdAt).toLocaleString()
             }))
         );
-        
+
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
         XLSX.writeFile(workbook, `BTB_Registrations_${new Date().toISOString().split('T')[0]}.xlsx`);
@@ -377,7 +377,7 @@ export default function Admin() {
                 'Submitted On': new Date(fb.createdAt).toLocaleString()
             }))
         );
-        
+
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Feedbacks');
         XLSX.writeFile(workbook, `BTB_Feedbacks_${new Date().toISOString().split('T')[0]}.xlsx`);
@@ -385,21 +385,21 @@ export default function Admin() {
 
     const downloadFeedbacksPDF = () => {
         const doc = new jsPDF('landscape');
-        
+
         doc.setFontSize(18);
         doc.setTextColor(6, 182, 212);
         doc.text('BTB Workshop 2025 - Feedback Report', 14, 20);
-        
+
         doc.setFontSize(10);
         doc.setTextColor(100, 100, 100);
         doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
         doc.text(`Total Feedbacks: ${feedbacks.length}`, 14, 34);
-        
+
         if (feedbackStats) {
             doc.text(`Average Overall Rating: ${feedbackStats.averageRatings.avgOverall?.toFixed(2) || 0}/5`, 14, 40);
             doc.text(`Recommendation Rate: ${feedbackStats.recommendPercentage}%`, 14, 46);
         }
-        
+
         const tableData = feedbacks.map(fb => [
             fb.name,
             fb.branch,
@@ -411,7 +411,7 @@ export default function Admin() {
             fb.wouldRecommend ? 'Yes' : 'No',
             fb.feedback.substring(0, 50) + '...'
         ]);
-        
+
         doc.autoTable({
             startY: 52,
             head: [['Name', 'Branch', 'Year', 'Overall', 'Content', 'Instructor', 'Venue', 'Recommend', 'Feedback']],
@@ -420,7 +420,7 @@ export default function Admin() {
             headStyles: { fillColor: [6, 182, 212] },
             styles: { fontSize: 8 }
         });
-        
+
         doc.save(`BTB_Feedbacks_${new Date().toISOString().split('T')[0]}.pdf`);
     };
 
@@ -430,9 +430,8 @@ export default function Admin() {
                 {[1, 2, 3, 4, 5].map((star) => (
                     <svg
                         key={star}
-                        className={`w-4 h-4 ${
-                            star <= rating ? 'text-yellow-400' : 'text-gray-600'
-                        }`}
+                        className={`w-4 h-4 ${star <= rating ? 'text-yellow-400' : 'text-gray-600'
+                            }`}
                         fill="currentColor"
                         viewBox="0 0 24 24"
                     >
@@ -518,7 +517,7 @@ export default function Admin() {
                             </svg>
                         </div>
                     </div>
-                    
+
                     <div className="backdrop-blur-md bg-purple-900/20 border border-purple-400/30 rounded-lg p-4 md:p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -530,7 +529,7 @@ export default function Admin() {
                             </svg>
                         </div>
                     </div>
-                    
+
                     <div className="backdrop-blur-md bg-green-900/20 border border-green-400/30 rounded-lg p-4 md:p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -542,7 +541,7 @@ export default function Admin() {
                             </svg>
                         </div>
                     </div>
-                    
+
                     <div className="backdrop-blur-md bg-orange-900/20 border border-orange-400/30 rounded-lg p-4 md:p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -566,11 +565,10 @@ export default function Admin() {
                                     setActiveTab(tab);
                                     if (tab !== 'scan') stopScanner();
                                 }}
-                                className={`flex-1 min-w-[120px] px-4 py-3 md:py-4 font-mono text-sm md:text-base transition-all ${
-                                    activeTab === tab
-                                        ? 'bg-cyan-500/20 text-cyan-400 border-b-2 border-cyan-400'
-                                        : 'text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10'
-                                }`}
+                                className={`flex-1 min-w-[120px] px-4 py-3 md:py-4 font-mono text-sm md:text-base transition-all ${activeTab === tab
+                                    ? 'bg-cyan-500/20 text-cyan-400 border-b-2 border-cyan-400'
+                                    : 'text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10'
+                                    }`}
                             >
                                 {tab === 'registrations' && '📋 Registrations'}
                                 {tab === 'scan' && '📷 Scan QR'}
@@ -641,11 +639,10 @@ export default function Admin() {
                                                         <td className="py-3 px-2">
                                                             <button
                                                                 onClick={() => handleToggleShortlist(reg._id, reg.isShortlisted)}
-                                                                className={`px-2 py-1 rounded text-xs ${
-                                                                    reg.isShortlisted
-                                                                        ? 'bg-purple-500/20 text-purple-400 hover:bg-purple-500/30'
-                                                                        : 'bg-gray-500/20 text-gray-400 hover:bg-gray-500/30'
-                                                                }`}
+                                                                className={`px-2 py-1 rounded text-xs ${reg.isShortlisted
+                                                                    ? 'bg-purple-500/20 text-purple-400 hover:bg-purple-500/30'
+                                                                    : 'bg-gray-500/20 text-gray-400 hover:bg-gray-500/30'
+                                                                    }`}
                                                             >
                                                                 {reg.isShortlisted ? '✓ Shortlisted' : '+ Shortlist'}
                                                             </button>
@@ -741,7 +738,7 @@ export default function Admin() {
                                             User Details
                                             <span className="text-purple-500/60">/&gt;</span>
                                         </h3>
-                                        
+
                                         <div className="space-y-3 text-sm md:text-base font-mono">
                                             <div className="flex justify-between border-b border-purple-400/20 pb-2">
                                                 <span className="text-gray-400">Name:</span>
@@ -802,9 +799,163 @@ export default function Admin() {
                         {activeTab === 'feedbacks' && (
                             <div>
                                 {/* Your existing feedbacks code */}
-                                <div className="text-center py-8 text-gray-400 font-mono">
-                                    Feedbacks section (keep existing code)
+
+                                {feedbackStats && (
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                                        <div className="backdrop-blur-md bg-yellow-900/20 border border-yellow-400/30 rounded-lg p-4">
+                                            <p className="text-yellow-400 font-mono text-xs mb-2">Overall Experience</p>
+                                            <div className="flex items-center gap-2">
+                                                <StarDisplay rating={Math.round(feedbackStats.averageRatings.avgOverall || 0)} />
+                                                <span className="text-white font-bold text-lg">
+                                                    {(feedbackStats.averageRatings.avgOverall || 0).toFixed(1)}/5
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="backdrop-blur-md bg-blue-900/20 border border-blue-400/30 rounded-lg p-4">
+                                            <p className="text-blue-400 font-mono text-xs mb-2">Content Quality</p>
+                                            <div className="flex items-center gap-2">
+                                                <StarDisplay rating={Math.round(feedbackStats.averageRatings.avgContent || 0)} />
+                                                <span className="text-white font-bold text-lg">
+                                                    {(feedbackStats.averageRatings.avgContent || 0).toFixed(1)}/5
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="backdrop-blur-md bg-purple-900/20 border border-purple-400/30 rounded-lg p-4">
+                                            <p className="text-purple-400 font-mono text-xs mb-2">Instructor Knowledge</p>
+                                            <div className="flex items-center gap-2">
+                                                <StarDisplay rating={Math.round(feedbackStats.averageRatings.avgInstructor || 0)} />
+                                                <span className="text-white font-bold text-lg">
+                                                    {(feedbackStats.averageRatings.avgInstructor || 0).toFixed(1)}/5
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="backdrop-blur-md bg-green-900/20 border border-green-400/30 rounded-lg p-4">
+                                            <p className="text-green-400 font-mono text-xs mb-2">Venue & Arrangements</p>
+                                            <div className="flex items-center gap-2">
+                                                <StarDisplay rating={Math.round(feedbackStats.averageRatings.avgVenue || 0)} />
+                                                <span className="text-white font-bold text-lg">
+                                                    {(feedbackStats.averageRatings.avgVenue || 0).toFixed(1)}/5
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Recommendation Rate */}
+                                {feedbackStats && (
+                                    <div className="backdrop-blur-md bg-cyan-900/20 border border-cyan-400/30 rounded-lg p-6 mb-6">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-cyan-400 font-mono text-sm mb-2">Would Recommend</p>
+                                                <p className="text-4xl font-bold text-white">{feedbackStats.recommendPercentage}%</p>
+                                            </div>
+                                            <svg className="w-16 h-16 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Search and Download */}
+                                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                                    <input
+                                        type="text"
+                                        placeholder="Search by name, branch, year..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="flex-1 bg-[rgb(15,18,25)]/80 border border-cyan-400/30 rounded px-4 py-2 text-white font-mono text-sm focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all"
+                                    />
+                                    <button
+                                        onClick={downloadFeedbacksExcel}
+                                        className="px-6 py-2 bg-green-500/20 border-2 border-green-400 text-green-400 font-mono rounded-lg hover:bg-green-500/30 transition-all whitespace-nowrap"
+                                    >
+                                        📥 Excel
+                                    </button>
+                                    <button
+                                        onClick={downloadFeedbacksPDF}
+                                        className="px-6 py-2 bg-red-500/20 border-2 border-red-400 text-red-400 font-mono rounded-lg hover:bg-red-500/30 transition-all whitespace-nowrap"
+                                    >
+                                        📄 PDF
+                                    </button>
                                 </div>
+
+                                {/* Feedbacks List */}
+                                {loading ? (
+                                    <div className="text-center py-8">
+                                        <div className="animate-spin w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full mx-auto"></div>
+                                        <p className="text-gray-400 font-mono mt-4">Loading...</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {feedbacks.map((fb) => (
+                                            <div key={fb._id} className="backdrop-blur-sm bg-[rgb(15,18,25)]/80 border border-purple-400/30 rounded-lg p-6">
+                                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+                                                    <div>
+                                                        <h3 className="text-lg font-bold text-white font-mono">{fb.name}</h3>
+                                                        <p className="text-sm text-gray-400 font-mono">{fb.branch} • {fb.year}</p>
+                                                    </div>
+                                                    <div className="mt-2 md:mt-0">
+                                                        {fb.wouldRecommend ? (
+                                                            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-mono">👍 Recommends</span>
+                                                        ) : (
+                                                            <span className="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-mono">👎 Doesn't Recommend</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                                    <div>
+                                                        <p className="text-xs text-gray-400 font-mono mb-1">Overall</p>
+                                                        <StarDisplay rating={fb.rating} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-gray-400 font-mono mb-1">Content</p>
+                                                        <StarDisplay rating={fb.contentQuality} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-gray-400 font-mono mb-1">Instructor</p>
+                                                        <StarDisplay rating={fb.instructorKnowledge} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-gray-400 font-mono mb-1">Venue</p>
+                                                        <StarDisplay rating={fb.venueRating} />
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    <div>
+                                                        <p className="text-sm text-cyan-400 font-mono mb-1">Feedback:</p>
+                                                        <p className="text-sm text-gray-300">{fb.feedback}</p>
+                                                    </div>
+                                                    {fb.improvements && (
+                                                        <div>
+                                                            <p className="text-sm text-green-400 font-mono mb-1">Improvements:</p>
+                                                            <p className="text-sm text-gray-300">{fb.improvements}</p>
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        <p className="text-sm text-pink-400 font-mono mb-1">Next Event Suggestion:</p>
+                                                        <p className="text-sm text-gray-300">{fb.nextEventSuggestion}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-4 pt-4 border-t border-purple-400/20">
+                                                    <p className="text-xs text-gray-500 font-mono">
+                                                        Submitted: {new Date(fb.createdAt).toLocaleString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {feedbacks.length === 0 && (
+                                            <div className="text-center py-8 text-gray-400 font-mono">
+                                                No feedbacks found
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
