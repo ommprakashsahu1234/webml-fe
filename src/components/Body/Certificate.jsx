@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import jsPDF from 'jspdf';
 // Import logos
-import gitaLogo from '../../../public/gita.png';  // Update path as needed
-import csiLogo from '../../../public/csi.png';     // Update path as needed
+import gitaLogo from '../../../public/gita.png';
+import csiLogo from '../../../public/csi.png';
 // Import signature images
-import hodsign from '../../signatures/hod.jpg'
+import hodsign from '../../signatures/hod.jpg';
 import surensign from '../../signatures/suren.jpg';
 import principalSign from '../../signatures/principal.jpg';
 
@@ -153,10 +153,11 @@ export default function Certificate() {
             pdf.setTextColor(107, 114, 128);
             pdf.text('Date: 1st November, 2025', pageWidth / 2, 151, { align: 'center' });
 
-            // === SIGNATURES WITH ROTATION FIX ===
-            const signY = pageHeight - 45;
-            const leftX = 55;
-            const rightX = pageWidth - 55;
+            // === THREE SIGNATURES ===
+            const signY = pageHeight - 35;
+            const leftX = 50;
+            const centerX = pageWidth / 2;
+            const rightX = pageWidth - 50;
 
             try {
                 // Function to rotate image
@@ -168,7 +169,6 @@ export default function Certificate() {
                             const canvas = document.createElement('canvas');
                             const ctx = canvas.getContext('2d');
 
-                            // Set canvas dimensions based on rotation
                             if (rotation === 90 || rotation === 270) {
                                 canvas.width = img.height;
                                 canvas.height = img.width;
@@ -177,7 +177,6 @@ export default function Certificate() {
                                 canvas.height = img.height;
                             }
 
-                            // Rotate and draw
                             ctx.save();
                             if (rotation === 90) {
                                 ctx.translate(canvas.width, 0);
@@ -205,110 +204,55 @@ export default function Certificate() {
                     });
                 };
 
-                await rotateAndAddImage(csiSign, leftX - 20, signY - 15, 40, 12, 0);
-                await rotateAndAddImage(principalSign, rightX - 20, signY - 15, 40, 12, 0);
-
+                // Add all three signatures
+                await rotateAndAddImage(surensign, leftX - 18, signY - 15, 36, 11, 0);
+                await rotateAndAddImage(hodsign, centerX - 18, signY - 15, 36, 11, 0);
+                await rotateAndAddImage(principalSign, rightX - 18, signY - 15, 36, 11, 0);
 
             } catch (e) {
                 console.log('Signature images not added:', e.message);
             }
 
+            // Left signature - Workshop Coordinator
             pdf.setDrawColor(31, 41, 55);
             pdf.setLineWidth(0.8);
-            pdf.line(leftX - 25, signY, leftX + 25, signY);
-
-            pdf.setFontSize(9);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(55, 65, 81);
-            pdf.text('CSI Co-ordinator', leftX, signY + 6, { align: 'center' });
+            pdf.line(leftX - 20, signY, leftX + 20, signY);
 
             pdf.setFontSize(8);
-            pdf.setFont('helvetica', 'normal');
-            pdf.setTextColor(107, 114, 128);
-            pdf.text('Computer Society of India', leftX, signY + 11, { align: 'center' });
-
-            pdf.line(rightX - 25, signY, rightX + 25, signY);
-
-            pdf.setFontSize(9);
             pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(55, 65, 81);
-            pdf.text('Principal', rightX, signY + 6, { align: 'center' });
+            pdf.text('Workshop Coordinator', leftX, signY + 5, { align: 'center' });
 
-            pdf.setFontSize(8);
+            pdf.setFontSize(7);
             pdf.setFont('helvetica', 'normal');
             pdf.setTextColor(107, 114, 128);
-            pdf.text('GITA Autonomous College', rightX, signY + 11, { align: 'center' });
+            pdf.text('Behind The Browser', leftX, signY + 9, { align: 'center' });
 
-            // === CENTER STAR BADGE ===
-            // const starX = pageWidth / 2;
-            // const starY = signY;
-            // const starRadius = 8;
+            // Center signature - HOD
+            pdf.line(centerX - 20, signY, centerX + 20, signY);
 
-            // pdf.setFillColor(234, 179, 8);
-            // pdf.setDrawColor(202, 138, 4);
-            // pdf.setLineWidth(1.5);
-            // pdf.circle(starX, starY, starRadius, 'FD');
+            pdf.setFontSize(8);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(55, 65, 81);
+            pdf.text('HOD, CSE', centerX, signY + 5, { align: 'center' });
 
-            // // Draw star properly
-            // pdf.setFontSize(16);
-            // pdf.setTextColor(133, 77, 14);
-            // // pdf.text('★', starX, starY + 2, { align: 'center' });
-            // pdf.text('A', starX, starY + 2, { align: 'center' });
+            pdf.setFontSize(7);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(107, 114, 128);
+            pdf.text('GITA Autonomous College', centerX, signY + 9, { align: 'center' });
 
+            // Right signature - Principal
+            pdf.line(rightX - 20, signY, rightX + 20, signY);
 
-            // === CENTER STAR BADGE ===
-            const starX = pageWidth / 2;
-            const starY = signY;
-            const starRadius = 8;
+            pdf.setFontSize(8);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(55, 65, 81);
+            pdf.text('Principal', rightX, signY + 5, { align: 'center' });
 
-            // Gold circle
-            pdf.setFillColor(234, 179, 8);
-            pdf.setDrawColor(202, 138, 4);
-            pdf.setLineWidth(1.5);
-            pdf.circle(starX, starY, starRadius, 'FD');
-
-            // Draw a 5-pointed star shape
-            const drawStar = (cx, cy, spikes, outerRadius, innerRadius) => {
-                let rot = Math.PI / 2 * 3;
-                let x = cx;
-                let y = cy;
-                const step = Math.PI / spikes;
-
-                const points = [];
-
-                for (let i = 0; i < spikes; i++) {
-                    x = cx + Math.cos(rot) * outerRadius;
-                    y = cy + Math.sin(rot) * outerRadius;
-                    points.push({ x, y });
-                    rot += step;
-
-                    x = cx + Math.cos(rot) * innerRadius;
-                    y = cy + Math.sin(rot) * innerRadius;
-                    points.push({ x, y });
-                    rot += step;
-                }
-
-                // Draw the star
-                pdf.setFillColor(133, 77, 14); // Yellow-800
-                pdf.setDrawColor(133, 77, 14);
-
-                // Start path
-                pdf.lines(
-                    points.slice(1).map((p, i) => [
-                        p.x - points[i].x,
-                        p.y - points[i].y
-                    ]),
-                    points[0].x,
-                    points[0].y,
-                    [1, 1],
-                    'FD',
-                    true
-                );
-            };
-
-            // Draw the star (5 points, outer radius 4, inner radius 1.5)
-            drawStar(starX, starY, 5, 4, 1.5);
-
+            pdf.setFontSize(7);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(107, 114, 128);
+            pdf.text('GITA Autonomous College', rightX, signY + 9, { align: 'center' });
 
             pdf.save(`BTB_Certificate_${userData.roll}.pdf`);
 
@@ -330,7 +274,6 @@ export default function Certificate() {
             setIsDownloading(false);
         }
     };
-
 
     if (!userData) {
         return <div className="min-h-screen bg-[rgb(15,18,25)] flex items-center justify-center text-white">Loading...</div>;
@@ -399,7 +342,7 @@ export default function Certificate() {
 
                             {/* Content */}
                             <div className="flex flex-col justify-between h-full text-center relative">
-                                {/* Header - MOBILE TEXT SIZES REDUCED */}
+                                {/* Header */}
                                 <div className={isMobile ? 'mt-20' : ''}>
                                     <h1 className={`${isMobile ? 'text-lg' : 'text-3xl md:text-5xl'} font-serif font-bold text-gray-800 ${isMobile ? 'mb-2' : 'mb-6'}`}>
                                         Certificate of Participation
@@ -411,7 +354,7 @@ export default function Certificate() {
                                     </div>
                                 </div>
 
-                                {/* Name - MOBILE TEXT SIZES REDUCED */}
+                                {/* Name */}
                                 <div className={isMobile ? 'my-2' : 'my-6'}>
                                     <h2 className={`${isMobile ? 'text-lg' : 'text-2xl md:text-4xl'} font-serif font-bold text-teal-700 ${isMobile ? 'mb-1' : 'mb-2'} border-b-2 border-gray-400 pb-2 inline-block ${isMobile ? 'px-4' : 'px-12'}`}>
                                         {userData.name}
@@ -424,7 +367,7 @@ export default function Certificate() {
                                     </p>
                                 </div>
 
-                                {/* Body Text - MOBILE TEXT SIZES REDUCED */}
+                                {/* Body Text */}
                                 <div className={isMobile ? 'my-2' : 'my-6'}>
                                     <p className={`${isMobile ? 'text-[10px]' : 'text-lg'} text-gray-700 leading-relaxed`}>
                                         For the participation in the completion of
@@ -442,86 +385,110 @@ export default function Certificate() {
                                     </p>
                                 </div>
 
-                                {/* Signatures Section */}
-                                <div className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-between items-end'} mt-auto ${isMobile ? 'pt-2 px-4 pb-3' : 'pt-4 px-12 pb-6'}`}>
+                                {/* Signatures Section - 3 Signatures */}
+                                <div className={`flex ${isMobile ? 'flex-col gap-2' : 'justify-between items-end'} mt-auto ${isMobile ? 'pt-2 px-2 pb-3' : 'pt-4 px-8 pb-8'}`}>
                                     {isMobile ? (
                                         <>
-                                            <div className="flex justify-between items-end border-t border-gray-300 pt-2">
-                                                <div className="text-left flex-1">
-                                                    <div className="mb-1" style={{ height: '25px' }}>
+                                            {/* Mobile - Stacked Layout */}
+                                            <div className="flex flex-col gap-2">
+                                                {/* Workshop Coordinator */}
+                                                <div className="text-center border-t border-gray-300 pt-2">
+                                                    <div className="mb-1 flex justify-center" style={{ height: '20px' }}>
                                                         <img
-                                                            src={csiSign}
-                                                            alt="CSI Signature"
+                                                            src={surensign}
+                                                            alt="Workshop Coordinator Signature"
                                                             className="h-full w-auto object-contain"
-                                                            style={{ maxWidth: '80px' }}
+                                                            style={{ maxWidth: '70px' }}
                                                             onError={(e) => e.target.style.display = 'none'}
                                                         />
                                                     </div>
-                                                    <div className="border-t-2 border-gray-800 w-24 mb-1"></div>
-                                                    <p className="text-[8px] font-semibold text-gray-700 leading-tight">CSI Co-ordinator</p>
-                                                    <p className="text-[7px] text-gray-500 leading-tight">Computer Society of India</p>
+                                                    <div className="border-t-2 border-gray-800 w-20 mb-1 mx-auto"></div>
+                                                    <p className="text-[7px] font-semibold text-gray-700 leading-tight">Workshop Coordinator</p>
+                                                    <p className="text-[6px] text-gray-500 leading-tight">Behind The Browser</p>
                                                 </div>
 
-                                                <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center border-2 border-yellow-600 shadow-lg">
-                                                    <svg className="w-5 h-5 text-yellow-800" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                                    </svg>
+                                                {/* HOD */}
+                                                <div className="text-center border-t border-gray-300 pt-2">
+                                                    <div className="mb-1 flex justify-center" style={{ height: '20px' }}>
+                                                        <img
+                                                            src={hodsign}
+                                                            alt="HOD Signature"
+                                                            className="h-full w-auto object-contain"
+                                                            style={{ maxWidth: '70px' }}
+                                                            onError={(e) => e.target.style.display = 'none'}
+                                                        />
+                                                    </div>
+                                                    <div className="border-t-2 border-gray-800 w-20 mb-1 mx-auto"></div>
+                                                    <p className="text-[7px] font-semibold text-gray-700 leading-tight">HOD, CSE</p>
+                                                    <p className="text-[6px] text-gray-500 leading-tight">GITA Autonomous College</p>
                                                 </div>
-                                            </div>
 
-                                            <div className="text-right">
-                                                <div className="mb-1 flex justify-end" style={{ height: '25px' }}>
-                                                    <img
-                                                        src={principalSign}
-                                                        alt="Principal Signature"
-                                                        className="h-full w-auto object-contain"
-                                                        style={{ maxWidth: '80px' }}
-                                                        onError={(e) => e.target.style.display = 'none'}
-                                                    />
+                                                {/* Principal */}
+                                                <div className="text-center border-t border-gray-300 pt-2">
+                                                    <div className="mb-1 flex justify-center" style={{ height: '20px' }}>
+                                                        <img
+                                                            src={principalSign}
+                                                            alt="Principal Signature"
+                                                            className="h-full w-auto object-contain"
+                                                            style={{ maxWidth: '70px' }}
+                                                            onError={(e) => e.target.style.display = 'none'}
+                                                        />
+                                                    </div>
+                                                    <div className="border-t-2 border-gray-800 w-20 mb-1 mx-auto"></div>
+                                                    <p className="text-[7px] font-semibold text-gray-700 leading-tight">Principal</p>
+                                                    <p className="text-[6px] text-gray-500 leading-tight">GITA Autonomous College</p>
                                                 </div>
-                                                <div className="border-t-2 border-gray-800 w-24 mb-1 ml-auto"></div>
-                                                <p className="text-[8px] font-semibold text-gray-700 leading-tight">Principal</p>
-                                                <p className="text-[7px] text-gray-500 leading-tight">GITA Autonomous College</p>
                                             </div>
                                         </>
                                     ) : (
+                                        /* Desktop Layout - 3 Columns */
                                         <>
-                                            <div className="text-center flex flex-col items-center" style={{ width: '35%' }}>
-                                                <div className="mb-1 flex items-end justify-center" style={{ height: '50px' }}>
+                                            {/* Workshop Coordinator */}
+                                            <div className="text-center flex flex-col items-center" style={{ width: '30%' }}>
+                                                <div className="mb-1 flex items-end justify-center" style={{ height: '40px' }}>
                                                     <img
-                                                        src={csiSign}
-                                                        alt="CSI Signature"
+                                                        src={surensign}
+                                                        alt="Workshop Coordinator Signature"
                                                         className="max-w-full h-auto object-contain"
-                                                        style={{ maxHeight: '50px', maxWidth: '160px' }}
+                                                        style={{ maxHeight: '40px', maxWidth: '120px' }}
                                                         onError={(e) => e.target.style.display = 'none'}
                                                     />
                                                 </div>
                                                 <div className="border-t-2 border-gray-800 w-full mb-1.5"></div>
-                                                <p className="text-xs font-semibold text-gray-700 leading-tight">CSI Co-ordinator</p>
-                                                <p className="text-[10px] text-gray-500 leading-tight">Computer Society of India</p>
+                                                <p className="text-[10px] font-semibold text-gray-700 leading-tight">Workshop Coordinator</p>
+                                                <p className="text-[9px] text-gray-500 leading-tight">Behind The Browser</p>
                                             </div>
 
-                                            <div className="flex items-end justify-center" style={{ width: '25%' }}>
-                                                <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center border-4 border-yellow-600 shadow-lg mb-3">
-                                                    <svg className="w-8 h-8 text-yellow-800" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                                    </svg>
+                                            {/* HOD */}
+                                            <div className="text-center flex flex-col items-center" style={{ width: '30%' }}>
+                                                <div className="mb-1 flex items-end justify-center" style={{ height: '40px' }}>
+                                                    <img
+                                                        src={hodsign}
+                                                        alt="HOD Signature"
+                                                        className="max-w-full h-auto object-contain"
+                                                        style={{ maxHeight: '40px', maxWidth: '120px' }}
+                                                        onError={(e) => e.target.style.display = 'none'}
+                                                    />
                                                 </div>
+                                                <div className="border-t-2 border-gray-800 w-full mb-1.5"></div>
+                                                <p className="text-[10px] font-semibold text-gray-700 leading-tight">HOD, CSE</p>
+                                                <p className="text-[9px] text-gray-500 leading-tight">GITA Autonomous College</p>
                                             </div>
 
-                                            <div className="text-center flex flex-col items-center" style={{ width: '35%' }}>
-                                                <div className="mb-1 flex items-end justify-center" style={{ height: '50px' }}>
+                                            {/* Principal */}
+                                            <div className="text-center flex flex-col items-center" style={{ width: '30%' }}>
+                                                <div className="mb-1 flex items-end justify-center" style={{ height: '40px' }}>
                                                     <img
                                                         src={principalSign}
                                                         alt="Principal Signature"
                                                         className="max-w-full h-auto object-contain"
-                                                        style={{ maxHeight: '50px', maxWidth: '160px' }}
+                                                        style={{ maxHeight: '40px', maxWidth: '120px' }}
                                                         onError={(e) => e.target.style.display = 'none'}
                                                     />
                                                 </div>
                                                 <div className="border-t-2 border-gray-800 w-full mb-1.5"></div>
-                                                <p className="text-xs font-semibold text-gray-700 leading-tight">Principal</p>
-                                                <p className="text-[10px] text-gray-500 leading-tight">GITA Autonomous College</p>
+                                                <p className="text-[10px] font-semibold text-gray-700 leading-tight">Principal</p>
+                                                <p className="text-[9px] text-gray-500 leading-tight">GITA Autonomous College</p>
                                             </div>
                                         </>
                                     )}
@@ -591,5 +558,4 @@ export default function Certificate() {
             </div>
         </div>
     );
-
 }
