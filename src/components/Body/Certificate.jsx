@@ -226,7 +226,7 @@ export default function Certificate() {
             pdf.setFontSize(7);
             pdf.setFont('helvetica', 'normal');
             pdf.setTextColor(107, 114, 128);
-            pdf.text('Behind The Browser', leftX, signY + 9, { align: 'center' });
+            pdf.text('(Behind The Browser)', leftX, signY + 9, { align: 'center' });
 
             // Center signature - HOD
             pdf.line(centerX - 20, signY, centerX + 20, signY);
@@ -404,7 +404,7 @@ export default function Certificate() {
                                                     </div>
                                                     <div className="border-t-2 border-gray-800 w-20 mb-1 mx-auto"></div>
                                                     <p className="text-[7px] font-semibold text-gray-700 leading-tight">Workshop Coordinator</p>
-                                                    <p className="text-[6px] text-gray-500 leading-tight">Behind The Browser</p>
+                                                    <p className="text-[6px] text-gray-500 leading-tight">(Behind The Browser)</p>
                                                 </div>
 
                                                 {/* HOD */}
@@ -456,7 +456,7 @@ export default function Certificate() {
                                                 </div>
                                                 <div className="border-t-2 border-gray-800 w-full mb-1.5"></div>
                                                 <p className="text-[10px] font-semibold text-gray-700 leading-tight">Workshop Coordinator</p>
-                                                <p className="text-[9px] text-gray-500 leading-tight">Behind The Browser</p>
+                                                <p className="text-[9px] text-gray-500 leading-tight">(Behind The Browser)</p>
                                             </div>
 
                                             {/* HOD */}
