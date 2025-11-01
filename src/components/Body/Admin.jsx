@@ -299,7 +299,7 @@ export default function Admin() {
             } catch (err) {
                 console.log('Rear camera not available, trying front camera...');
                 await html5QrCode.start(
-                    { facingMode: "environment" },
+                    { facingMode: "user" },
                     config,
                     qrCodeSuccessCallback
                 );
